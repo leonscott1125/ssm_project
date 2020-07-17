@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="http://localhost:8081/ssm_project_war_exploded/">
+    <title>Title</title>
+    <meta charset="UTF-8">
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+
+</body>
+</html>
+
+<script>
+    $(manyValues());
+
+    function manyValues(){
+        var url=window.location.search;
+        if(url.indexOf("?")!=-1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            var key = new Array(strs.length);
+            var value = new Array(strs.length);
+            for (i = 0; i < strs.length; i++) {
+                key[i] = strs[i].split("=")[0]
+                value[i] = unescape(strs[i].split("=")[1]);
+                alert(key[i] + "=" + value[i]);
+            }
+        }
+
+</script>

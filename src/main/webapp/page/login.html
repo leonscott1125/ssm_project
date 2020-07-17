@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="http://localhost:8081/ssm_project_war_exploded/">
+    <title>Title</title>
+    <meta charset="UTF-8">
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+<form id="loginForm">
+    <input type="text" name="userName" placeholder="userName"><br>
+    <input type="password" name="password" placeholder="password"><br>
+    <input type="button" value="Login" id="loginButton">
+</form>
+<div id="error" style="color: red;"></div>
+</body>
+</html>
+
+<script>
+
+    $(function () {
+        $("#loginButton").click(function () {
+            $.ajax({
+                url:"users/login",
+                type:"get",
+                dataType:"json",
+                data:$("#loginForm").serialize(),
+                success:function (data) {
+                    console.log(data);
+                    if(data.code == 0){
+                        //跳转页面
+                        location.href = "page/depList.html";
+                    }
+                    else{
+                        console.log("error");
+                        $("#error").text(data.message);
+                    }
+                }
+            })
+        })
+    })
+</script>

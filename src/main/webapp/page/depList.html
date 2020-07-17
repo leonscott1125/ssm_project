@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="http://localhost:8081/ssm_project_war_exploded/">
+    <title>Title</title>
+    <meta charset="UTF-8">
+    <script src="js/jquery.js"></script>
+</head>
+<style>
+    .list{
+        cursor: pointer;
+    }
+</style>
+<body>
+<div><a href="" id="user"></a></div>
+<div>
+    <table id="list">
+        <tr>
+            <td>部门名称</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    $.ajax({
+        url:"users/loginUser",
+        type:"get",
+        dataType:"json",
+        success:function (data) {
+            $("#user").append(data.userName);
+        }
+    })
+
+    $.ajax({
+        url:"deps/list",
+        type:"get",
+        dataType:"json",
+        success:function (data) {
+            for (var i in data){
+                $("#list").append('<tr><td name="'+data[i].depId+'" class="list">'+data[i].depName+'</td></tr>')
+            }
+        }
+    })
+    
+    $(".list").click(function () {
+        console.log("点击了部门");
+        window.location.href = "page/depInfo.html?depId="+$(this).prop("name");
+    })
+</script>

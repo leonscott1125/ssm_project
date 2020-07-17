@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+    <context:component-scan base-package="service,jedis"></context:component-scan>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="username" value="root"></property>
+        <property name="password" value="1234"></property>
+        <property name="url" value="jdbc:mysql://localhost:3306/test"></property>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="initialSize" value="10"></property>
+        <property name="minIdle" value="5"></property>
+        <property name="maxActive" value="50"></property>
+    </bean>
+    <!--配置SqlSessionFactory用于替换Mybatis中原生的SqlSessionFactory-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:mybatis.xml"></property>
+    </bean>
+    <!--配置Mybatis生成Dao实例的扫描器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="dao"></property>
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <tx:advice id="transactionInterceptor" transaction-manager="dataSourceTransactionManager">
+        <tx:attributes>
+            <tx:method name="find*" isolation="READ_COMMITTED"/>
+            <tx:method name="del*" isolation="READ_COMMITTED"/>
+            <tx:method name="update*" isolation="READ_COMMITTED"/>
+            <tx:method name="add*" isolation="READ_COMMITTED"/>
+            <tx:method name="count*" isolation="READ_COMMITTED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--开启aop注解-->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+    <!--开启事务注解-->
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"></tx:annotation-driven>
+
+    <!--Jedis连接池配置对象-->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="minIdle" value="5"></property>
+        <property name="maxTotal" value="50"></property>
+        <property name="maxIdle" value="10"></property>
+    </bean>
+    <!--Jedis连接工厂-->
+    <bean id="jedisFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <!--注入配置对象-->
+        <property name="poolConfig" ref="poolConfig"></property>
+        <!--配置连接的主机-->
+        <property name="hostName" value="192.168.255.128"></property>
+        <!--配置端口-->
+        <property name="port" value="6379"></property>
+        <!--开启连接池-->
+        <property name="usePool" value="true"></property>
+    </bean>
+    <!--配置RedisTemplate-->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <!--注入连接工厂-->
+        <property name="connectionFactory" ref="jedisFactory" />
+        <!--配置序列化器，用于对读写至redis中的数据进行序列化-->
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="hashValueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+        <!--开启事务  -->
+        <property name="enableTransactionSupport" value="true"></property>
+    </bean>
+</beans>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.DepDao">
+    <resultMap id="depMap" type="dep">
+        <id property="depId" column="DEPARTMENT_ID"></id>
+        <result property="depName" column="DEPARTMENT_NAME"></result>
+        <result property="managerId" column="MANAGER_ID"></result>
+        <result property="locationId" column="LOCATION_ID"></result>
+
+        <collection property="emps"
+                    ofType="emp"
+                    select="dao.EmpDao.findEmpByDepId"
+                    column="DEPARTMENT_ID">
+        </collection>
+    </resultMap>
+
+    <select id="findDep" resultMap="depMap">
+        select * from dep where 1=1
+        <if test="depId!=null">
+            and
+        </if>
+    </select>
+</mapper>
